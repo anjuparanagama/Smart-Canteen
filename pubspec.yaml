@@ -1,0 +1,81 @@
+name: unibites
+description: "ESD Project - UniBites"
+
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.0.17
+  iconsax_flutter: ^1.0.0
+  provider: ^6.1.4
+  flutter_overlay_window: ^0.4.5
+  firebase_core: ^3.12.1
+  firebase_auth: ^5.5.1
+  fluttertoast: ^8.2.12
+  cloud_firestore: ^5.6.5
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/icons/splash_logo.svg
+    - assets/icons/google-svgrepo-com.svg
+    - assets/icons/email_draft.svg
+    - assets/icons/hot-svgrepo-com.svg
+    - assets/icons/breakfast-bread-toasts-svgrepo-com.svg
+    - assets/icons/dinner-lunch-svgrepo-com.svg
+    - assets/icons/refreshment-beverage-svgrepo-com.svg
+    - assets/icons/dessert-ice-cream-svgrepo-com.svg
+    - assets/icons/snacks-for-watch-sportive-game-of-rugby-svgrepo-com.svg
+    - assets/icons/cookie-svgrepo-com.svg
+    - assets/icons/milk-svgrepo-com.svg
+    - assets/icons/search-svgrepo-com.svg
+    - assets/icons/wrong-delete-remove-trash-minus-cancel-close-svgrepo-com.svg
+    - assets/icons/success-filled-svgrepo-com.svg
+    - assets/images/foods/dosa.jpg
+    - assets/images/foods/fish_roll.webp
+    - assets/images/foods/kottu.jpg
+    - assets/images/foods/rice_with_chicken.jpg
+    - assets/images/foods/rice_with_egg.jpg
+    - assets/images/foods/rice_with_fish.jpg
+
+  fonts:
+    - family: Kanit Black
+      fonts:
+        - asset: assets/fonts/Kanit/Kanit-Black.ttf
+
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway/Raleway-Bold.ttf
+        - asset: assets/fonts/Raleway/Raleway-Medium.ttf
+        - asset: assets/fonts/Raleway/Raleway-Regular.ttf
+        - asset: assets/fonts/Raleway/Raleway-Thin.ttf
+
+    - family: Outfit Thin
+      fonts:
+        - asset: assets/fonts/Outfit/Outfit-Thin.ttf
+
+    - family: Outfit Regular
+      fonts:
+        - asset: assets/fonts/Outfit/Outfit-Regular.ttf
+
+    - family: Outfit Medium
+      fonts:
+        - asset: assets/fonts/Outfit/Outfit-Medium.ttf
+
+    - family: Outfit Bold
+      fonts:
+        - asset: assets/fonts/Outfit/Outfit-Bold.ttf
