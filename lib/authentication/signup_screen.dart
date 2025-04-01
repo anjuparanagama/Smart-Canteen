@@ -2,15 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:unibites/authentication/email_verification.dart';
+import 'package:unibites/authentication/email_verification_signup.dart';
 import 'package:unibites/resources/color.dart';
 import 'package:unibites/resources/dimension.dart';
 import 'package:unibites/resources/drawable.dart';
 import 'package:unibites/resources/font.dart';
 import 'package:unibites/resources/string.dart';
-import 'package:unibites/widgets/custom_toast_success.dart';
-
 import '../services/firestore_user_service.dart';
 import '../widgets/agreement_dialog.dart';
 import '../widgets/custom_toast_error.dart';
@@ -236,7 +235,7 @@ class _SignupScreenState extends State<SignupScreen> {
       // 6. Navigate to email verification screen
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => VerifyEmail()),
+          MaterialPageRoute(builder: (context) => VerifyEmailSignup()),
         );
       }
     } catch (e) {
@@ -283,6 +282,10 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   void _signup() {
+
+    // Hide keyboard first
+    _dismissKeyboard();
+
     // First validate all inputs
     if (!_validateInputs()) {
       // Show toast if validation fails
@@ -324,6 +327,11 @@ class _SignupScreenState extends State<SignupScreen> {
         ],
       );
     }
+  }
+
+  void _dismissKeyboard() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    SystemChannels.textInput.invokeMethod('TextInput.hide'); // Add this line
   }
 
   @override

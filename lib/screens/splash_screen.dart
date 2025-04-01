@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:unibites/resources/drawable.dart';
 import 'package:unibites/authentication/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../pages/main_page.dart'; // Adjust this import to your actual MainPage location
+import 'package:unibites/authentication/email_verification_login.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,7 +16,7 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
   // Initialize controller and animation directly
-  late AnimationController _animationController; // Changed to late instead of nullable
+  late AnimationController _animationController;
   late Animation<double> _shakeAnimation;
 
   @override
@@ -37,14 +40,51 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     // Start the animation
     _animationController.repeat(reverse: true);
 
-    // Navigate after 3 seconds
+    // Check login status and navigate accordingly after 3 seconds
     Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        _checkLoginStatus();
+      }
+    });
+  }
+
+  // Function to check if user is logged in
+  Future<void> _checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // Get the boolean value, defaulting to false if it doesn't exist
+      final isLoggedIn = prefs.getBool('loggedin') ?? false;
+      // No need to check for emailVerified in SharedPreferences since
+      // we're now handling that in the Auth class directly
+      if (mounted) {
+        if (isLoggedIn) {
+          final isEmailVerified = prefs.getBool('emailVerified') ?? false;
+
+          if (isEmailVerified) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainPage()),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const VerifyEmailLogin()),
+            );
+          }
+        } else {
+          // Navigate to login screen if user is not logged in
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error retrieving login status: $e');
+      // Navigate to login in case of error
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const LoginScreen()),
         );
       }
-    });
+    }
   }
 
   @override
@@ -62,7 +102,6 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Fixed the conditional rendering to use the same widget type
             AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {

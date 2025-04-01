@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unibites/pages/main_page.dart';
 import 'package:unibites/resources/color.dart';
 import 'package:unibites/resources/dimension.dart';
@@ -10,6 +12,8 @@ import 'package:unibites/resources/font.dart';
 import 'package:unibites/resources/string.dart';
 import 'package:unibites/authentication/signup_screen.dart';
 import '../widgets/agreement_dialog.dart';
+import 'auth.dart';
+import 'email_verification_login.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +26,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isChecked = false;
   bool _obscureText = true;
   bool _isLoading = false;
+
+  // Add the Auth instance here
+  final Auth _auth = Auth();
 
   // Form key for validation
   final _formKey = GlobalKey<FormState>();
@@ -37,8 +44,34 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // Method to save login state
+  Future<bool> _saveLoginState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('loggedin', true);
+      if (kDebugMode) {
+        print('Login state saved to SharedPreferences');
+      }
+      return true;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving login state: $e');
+      }
+      // Show error to user
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save login state. Please try again.')),
+        );
+      }
+      return false;
+    }
+  }
+
   // New method to handle login process
   Future<void> _handlePressed() async {
+    // Hide keyboard first
+    _dismissKeyboard();
+
     // Validate form first
     if (!_formKey.currentState!.validate()) {
       // Form has errors, don't proceed
@@ -63,8 +96,9 @@ class _LoginScreenState extends State<LoginScreen> {
               setState(() {
                 _isChecked = !_isChecked;
               });
-              // Call signup again after user agrees to terms
+              // Call login again after user agrees to terms
               if (_isChecked) {
+                _handlePressed();
               }
             },
             child: Text('Agree',
@@ -84,37 +118,68 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Simulate login process
-      await Future.delayed(Duration(seconds: 2));
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainPage()),
+      // Use Firebase auth to sign in
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
       );
 
-      // Add your actual login logic here
-      // For example:
-      // bool loginSuccess = await authService.login(_emailController.text, _passwordController.text);
-      // if (loginSuccess) { navigate to next screen }
+      // Check if email is verified
+      if (_auth.currentUser != null) {
+        // First save login state
+        bool saveSuccess = await _saveLoginState();
 
-      if (kDebugMode) {
-        print('Login process completed');
+        if (!saveSuccess) {
+          // If we couldn't save the login state, stop here
+          return;
+        }
+
+        // Then check email verification and navigate accordingly
+        if (_auth.currentUser!.emailVerified) {
+          // Email is verified, navigate to MainPage
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainPage()),
+            );
+          }
+          _saveLoginState();
+        } else {
+          // Email is not verified, navigate to EmailVerification page
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const VerifyEmailLogin()),
+            );
+          }
+        }
       }
     } catch (e) {
       // Handle login errors
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Account not found!'),
+            backgroundColor: Colors.red, // Success color
+            duration: Duration(seconds: 3), // Duration before dismissal
+          ),
+        );
+      }
+
       if (kDebugMode) {
         print('Login error: $e');
       }
-
-      // Optionally show an error dialog
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login failed. Please try again.')),
-      );
     } finally {
       // Reset loading state
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
+  }
+
+  void _dismissKeyboard() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    SystemChannels.textInput.invokeMethod('TextInput.hide'); // Add this line
   }
 
   @override
