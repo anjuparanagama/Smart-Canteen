@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:unibites/resources/color.dart';
 import 'package:unibites/resources/dimension.dart';
 import 'package:unibites/resources/drawable.dart';
-import 'package:unibites/resources/font.dart';
+
+import '../models/cart_model.dart';
 
 class InteractiveHorizontalCategoriesMenu extends StatefulWidget {
   final Map<int, VoidCallback>? categoryActions;
@@ -23,40 +25,50 @@ class InteractiveHorizontalCategoriesMenu extends StatefulWidget {
 class _InteractiveHorizontalCategoriesMenuState
     extends State<InteractiveHorizontalCategoriesMenu> {
   // List of categories with icons and labels
-  final List<CategoryItem> categories = [
-    CategoryItem(
-        icon: AppImages.popularIcon,
-        label: 'Popular',
-        action: () => print('Popular category selected')),
-    CategoryItem(
-        icon: AppImages.breakfastIcon,
-        label: 'Breakfast',
-        action: () => print('Breakfast category selected')),
-    CategoryItem(
-        icon: AppImages.lunchIcon,
-        label: 'Lunch',
-        action: () => print('Lunch category selected')),
-    CategoryItem(
-        icon: AppImages.drinksIcon,
-        label: 'Drinks',
-        action: () => print('Drinks category selected')),
-    CategoryItem(
-        icon: AppImages.dessertIcon,
-        label: 'Dessert',
-        action: () => print('Dessert category selected')),
-    CategoryItem(
-        icon: AppImages.snacksIcon,
-        label: 'Snacks',
-        action: () => print('Snacks category selected')),
-    CategoryItem(
-        icon: AppImages.cookiesIcon,
-        label: 'Biscuits',
-        action: () => print('Biscuits category selected')),
-    CategoryItem(
-        icon: AppImages.dairyIcon,
-        label: 'Dairy',
-        action: () => print('Dairy category selected')),
-  ];
+  late List<CategoryItem> categories;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize categories here to avoid context issues
+    categories = [
+      CategoryItem(
+          icon: AppImages.popularIcon,
+          label: 'Popular',
+          action: () => print('Popular category selected')),
+      CategoryItem(
+          icon: AppImages.breakfastIcon,
+          label: 'Breakfast',
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchBreakfastItems();
+          }),
+      CategoryItem(
+          icon: AppImages.lunchIcon,
+          label: 'Lunch',
+          action: () => print('Lunch category selected')),
+      CategoryItem(
+          icon: AppImages.drinksIcon,
+          label: 'Drinks',
+          action: () => print('Drinks category selected')),
+      CategoryItem(
+          icon: AppImages.dessertIcon,
+          label: 'Dessert',
+          action: () => print('Dessert category selected')),
+      CategoryItem(
+          icon: AppImages.snacksIcon,
+          label: 'Snacks',
+          action: () => print('Snacks category selected')),
+      CategoryItem(
+          icon: AppImages.cookiesIcon,
+          label: 'Biscuits',
+          action: () => print('Biscuits category selected')),
+      CategoryItem(
+          icon: AppImages.dairyIcon,
+          label: 'Dairy',
+          action: () => print('Dairy category selected')),
+    ];
+  }
 
   // Track the currently selected category index
   int _selectedIndex = 0;
@@ -135,7 +147,7 @@ class CategoryItemWidget extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: isActive ? Color(0xFFFFD634) : Colors.grey[300],
+              color: isActive ? const Color(0xFFFFD634) : Colors.grey[300],
               borderRadius: BorderRadius.circular(30),
             ),
             child: Padding(
@@ -146,6 +158,11 @@ class CategoryItemWidget extends StatelessWidget {
                 category.icon,
                 width: 24,
                 height: 24,
+                placeholderBuilder: (BuildContext context) => const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
               ),
             ),
           ),

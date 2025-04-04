@@ -1,15 +1,52 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CartModel extends ChangeNotifier {
-  final List<List<String>> _foodItems = [
-    ['Rice & Curry (Chicken)', '250.00', 'assets/images/foods/rice_with_chicken.jpg', '4.5', 'Rice with Chicken Curry'],
-    ['Rice & Curry (Egg)', '350.00', 'assets/images/foods/rice_with_egg.jpg', '4.8', 'Rice with Boiled Egg'],
-    ['Rice & Curry (Fish)', '250.00', 'assets/images/foods/rice_with_fish.jpg', '4.5', 'Rice with Fish Curry'],
-    ['Parata', '250.00', 'assets/images/foods/dosa.jpg', '4.5', 'Steaming Fresh Parata'],
-    ['Roll (Fish)', '250.00', 'assets/images/foods/fish_roll.webp', '4.5', 'Fresh Fish Rolls'],
-    ['Kottu (Chicken)', '250.00', 'assets/images/foods/kottu.jpg', '4.5', 'Hot Kottu with Chicken'],
-
-  ];
-
+  final List<List<String>> _foodItems = [];
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
   List<List<String>> get foodItems => _foodItems;
+
+  // Constructor to fetch data immediately
+  //CartModel() {
+   // fetchFoodItems();
+  //}
+
+  Future<void> fetchBreakfastItems() async {
+    try {
+      // Clear existing items
+      _foodItems.clear();
+
+      // Get reference to the breakfast collection
+      final CollectionReference breakfastCollection =
+      FirebaseFirestore.instance.collection('breakfast');
+
+      // Get all documents in the collection
+      QuerySnapshot querySnapshot = await breakfastCollection.get();
+
+      // Loop through each document
+      for (var doc in querySnapshot.docs) {
+        // Convert document data to map
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        // Add food item in required format
+        _foodItems.add([
+          data['item_name'] ?? '',
+          data['item_price'] ?? '',
+          data['item_image'] ?? '',
+          data['item_rating'] ?? '',
+          data['item_description'] ?? ''
+        ]);
+      }
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching food items: $e');
+      }
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

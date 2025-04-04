@@ -141,8 +141,10 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => const MainPage()),
             );
+            bool saveSuccess = await _saveLoginState();
+            _saveLoginState();
           }
-          _saveLoginState();
+
         } else {
           // Email is not verified, navigate to EmailVerification page
           if (mounted) {
@@ -185,14 +187,15 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(),
-        body: Padding(
+      resizeToAvoidBottomInset: false,
+      body: SingleChildScrollView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimension.paddingDefault * 2),
           child: Form(
             key: _formKey,
             child: Column(
               children: [
+                SizedBox(height: 90),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppDimension.paddingDefault),
                   child: Row(
@@ -516,16 +519,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        ),
-        bottomNavigationBar:
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppDimension.paddingDefault * 2),
-          child: BottomAppBar(
-            child: Column(
-              children: [
+                SizedBox(height: 40),
+
                 // Google sign in button
                 SizedBox(
                   width: double.infinity,
@@ -552,10 +547,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
+                SizedBox(height: 20),
               ],
             ),
           ),
-        )
+        ),
+      ),
     );
   }
 }

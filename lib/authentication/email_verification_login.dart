@@ -132,16 +132,9 @@ class _VerifyEmailState extends State<VerifyEmailLogin> {
         // Also save the verification status here in case user is already verified
         await _saveEmailVerificationStatus();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Your email is already verified. You can log in now.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
         // Navigate to login screen if email is already verified
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          MaterialPageRoute(builder: (context) => const MainPage()),
         );
       }
     } catch (e) {
@@ -217,8 +210,7 @@ class _VerifyEmailState extends State<VerifyEmailLogin> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppDimension.paddingDefault),
-                  child: Expanded(
-                    child: Text(
+                  child: Text(
                       textAlign: TextAlign.justify,
                       AppStrings.emailVerficationGuide,
                       style: TextStyle(
@@ -227,7 +219,6 @@ class _VerifyEmailState extends State<VerifyEmailLogin> {
                       ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 20),

@@ -288,8 +288,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
     // First validate all inputs
     if (!_validateInputs()) {
-      // Show toast if validation fails
-      CustomToast.show('Please fill all required fields correctly');
       return;
     }
 

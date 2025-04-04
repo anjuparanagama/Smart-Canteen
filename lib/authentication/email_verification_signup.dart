@@ -215,8 +215,7 @@ class _VerifyEmailState extends State<VerifyEmailSignup> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppDimension.paddingDefault),
-                  child: Expanded(
-                    child: Text(
+                  child: Text(
                       textAlign: TextAlign.justify,
                       AppStrings.emailVerficationGuide,
                       style: TextStyle(
@@ -225,7 +224,6 @@ class _VerifyEmailState extends State<VerifyEmailSignup> {
                       ),
                     ),
                   ),
-                ),
               ],
             ),
             const SizedBox(height: 20),

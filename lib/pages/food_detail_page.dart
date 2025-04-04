@@ -112,7 +112,7 @@ class FoodDetailPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitleRow(),
-              const SizedBox(height: 8),
+              const SizedBox(height: 3),
               _buildSubtitle(),
               const SizedBox(height: 24),
               _buildInfoCards(),
@@ -145,7 +145,7 @@ class FoodDetailPage extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.7),
+            color: Colors.black.withValues(alpha: 0.7),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(

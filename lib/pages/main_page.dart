@@ -11,6 +11,7 @@ import 'package:unibites/resources/drawable.dart';
 import 'package:unibites/resources/font.dart';
 import 'package:unibites/widgets/category_bar.dart';
 import '../components/food_tile.dart';
+import '../widgets/shimmer_loading.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -35,20 +36,38 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  void navigateFoodDetailPage(Map<String, dynamic> foodItem) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => FoodDetailPage(
-          title: foodItem['title'],
-          price: foodItem['price'],
-          imagePath: foodItem['imagePath'],
-          rating: foodItem['rating'],
-          subtitle: foodItem['subtitle'],
-        ),
-      ),
-    );
+  // Modified to ensure proper navigation and debug print
+  void navigateFoodDetailPage(String title, String price, String imagePath, String rating, String subtitle) {
+    try {
+
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FoodDetailPage(
+              title: title,
+              price: price,
+              imagePath: imagePath,
+              rating: rating,
+              subtitle: subtitle,
+            ),
+          ),
+        );
+
+        if (kDebugMode) {
+          print("Navigation push completed");
+        }
+      } else {
+        if (kDebugMode) {
+          print("Context is null or not mounted!");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error navigating to food detail: $e");
+      }
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,30 +84,30 @@ class _MainPageState extends State<MainPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1), // Subtle shadow effect
+              color: Colors.black.withValues(alpha: 0.1),
               spreadRadius: 2,
               blurRadius: 10,
-              offset: Offset(0, -3), // Shadow at the top of the BottomNavigationBar
+              offset: const Offset(0, -3),
             ),
           ],
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), // Rounded top-left corner
-            topRight: Radius.circular(20), // Rounded top-right corner
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20), // Ensuring the clipping matches decoration
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
           ),
           child: BottomNavigationBar(
             items: [
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: _selectedIndex == 0 ? Color(0xFFFFD634) : Colors.transparent,
+                    color: _selectedIndex == 0 ? const Color(0xFFFFD634) : Colors.transparent,
                     shape: BoxShape.rectangle,
                   ),
                   child: Padding(
@@ -100,10 +119,10 @@ class _MainPageState extends State<MainPage> {
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: _selectedIndex == 1 ? Color(0xFFFFD634) : Colors.transparent,
+                    color: _selectedIndex == 1 ? const Color(0xFFFFD634) : Colors.transparent,
                     shape: BoxShape.rectangle,
                   ),
                   child: Padding(
@@ -115,10 +134,10 @@ class _MainPageState extends State<MainPage> {
               ),
               BottomNavigationBarItem(
                 icon: Container(
-                  padding: EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    color: _selectedIndex == 2 ? Color(0xFFFFD634) : Colors.transparent,
+                    color: _selectedIndex == 2 ? const Color(0xFFFFD634) : Colors.transparent,
                     shape: BoxShape.rectangle,
                   ),
                   child: Padding(
@@ -211,7 +230,7 @@ class _MainPageState extends State<MainPage> {
                   color: AppColors.textDarkGrey,
                 ),
                 prefixIcon: const Icon(Iconsax.search_normal_1_copy,
-                color: AppColors.textDarkGrey,),
+                  color: AppColors.textDarkGrey,),
                 suffixIcon: IconButton(
                   icon: const Icon(Iconsax.setting_5),
                   color: AppColors.textDarkGrey,
@@ -248,40 +267,137 @@ class _MainPageState extends State<MainPage> {
                 fontSize: 24,
               ),
             ),
-
-            const SizedBox(height: 16),
-
             // Food Grid
+
+            SizedBox(height: 5),
+
             Expanded(
               child: Consumer<CartModel>(
                 builder: (context, value, child) {
-                  return GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                    ),
-                    itemCount: value.foodItems.length,
-                    itemBuilder: (context, index) {
-                      final foodItem = {
-                        'title': value.foodItems[index][0],
-                        'price': value.foodItems[index][1],
-                        'imagePath': value.foodItems[index][2],
-                        'rating': value.foodItems[index][3],
-                        'subtitle': value.foodItems[index][4],
-                      };
-                      return FoodTile(
-                        title: foodItem['title'] as String,
-                        price: foodItem['price'] as String,
-                        imagePath: foodItem['imagePath'] as String,
-                        rating: foodItem['rating'] as String,
-                        subtitle: foodItem['subtitle'] as String,
-                        onTap: () => navigateFoodDetailPage(foodItem),
-                      );
-                    },
-                  );
+                  // Check if data is loading
+                  if (value.isLoading) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Grid-based shimmer loading effect
+                          Expanded(
+                            child: GridView.builder(
+                              padding: const EdgeInsets.symmetric(vertical: AppDimension.paddingDefault),
+                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10, // Adjust this ratio as needed
+                              ),
+                              itemCount: 6, // Show multiple shimmer items while loading
+                              itemBuilder: (context, index) {
+                                return ShimmerLoading(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Top rectangle (image placeholder)
+                                        Container(
+                                          width: double.infinity,
+                                          height: 120,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(8.0),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // Middle rectangle (title placeholder)
+                                        Container(
+                                          width: double.infinity,
+                                          height: 20,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(4.0),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        // Bottom rectangle (subtitle/price placeholder)
+                                        Container(
+                                          width: MediaQuery.of(context).size.width * 0.3, // Make it shorter
+                                          height: 12,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(4.0),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Check if the list is empty after loading (potential error or no data)
+                  else if (value.foodItems.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.no_meals, size: 64, color: Colors.grey),
+                          SizedBox(height: 16),
+                          Text('No food items available'),
+                        ],
+                      ),
+                    );
+                  }
+                  // Data loaded successfully - show grid with staggered animations
+                  else {
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: AppDimension.paddingDefault),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                      ),
+                      itemCount: value.foodItems.length,
+                      itemBuilder: (context, index) {
+                        final item = value.foodItems[index];
+
+                        // Extract values from the list
+                        final title = item[0];
+                        final price = item[1];
+                        final imagePath = item[2];
+                        final rating = item[3];
+                        final subtitle = item[4];
+
+                        return AnimatedOpacity(
+                          opacity: 1.0,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                          child: TweenAnimationBuilder(
+                            tween: Tween<double>(begin: 0.0, end: 1.0),
+                            duration: Duration(milliseconds: 300 + (index * 50)),
+                            builder: (context, val, child) {
+                              return Transform.scale(
+                                scale: 0.8 + (0.2 * val),
+                                child: child,
+                              );
+                            },
+                            child: FoodTile(
+                              title: title,
+                              price: price,
+                              imagePath: imagePath,
+                              rating: rating,
+                              subtitle: subtitle,
+                              onTap: () => navigateFoodDetailPage(title, price, imagePath, rating, subtitle),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
