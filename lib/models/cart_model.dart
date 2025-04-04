@@ -9,7 +9,7 @@ class CartModel extends ChangeNotifier {
 
   // Constructor to fetch data immediately
   //CartModel() {
-   // fetchFoodItems();
+  //  fetchBreakfastItems();
   //}
 
   Future<void> fetchBreakfastItems() async {
@@ -29,13 +29,14 @@ class CartModel extends ChangeNotifier {
         // Convert document data to map
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-        // Add food item in required format
+        // Add food item in required format including document ID as the last element
         _foodItems.add([
           data['item_name'] ?? '',
           data['item_price'] ?? '',
           data['item_image'] ?? '',
           data['item_rating'] ?? '',
-          data['item_description'] ?? ''
+          data['item_description'] ?? '',
+          doc.id // Store the document ID
         ]);
       }
 

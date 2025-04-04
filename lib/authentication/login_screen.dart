@@ -45,12 +45,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Method to save login state
+  // Method to save login state
   Future<bool> _saveLoginState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('loggedin', true);
+      // Save the email address
+      await prefs.setString('userEmail', _emailController.text.trim());
       if (kDebugMode) {
-        print('Login state saved to SharedPreferences');
+        print('Login state and email saved to SharedPreferences');
       }
       return true;
     } catch (e) {

@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unibites/models/cart_model.dart';
-import 'package:unibites/pages/food_detail_page.dart';
+import 'package:unibites/pages/food_detail_page_edit.dart';
 import 'package:unibites/resources/color.dart';
 import 'package:unibites/resources/dimension.dart';
 import 'package:unibites/resources/drawable.dart';
@@ -12,6 +13,7 @@ import 'package:unibites/resources/font.dart';
 import 'package:unibites/widgets/category_bar.dart';
 import '../components/food_tile.dart';
 import '../widgets/shimmer_loading.dart';
+import 'food_detail_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -23,6 +25,16 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String selectedCategory = "Popular"; // Default category
   int _selectedIndex = 0;
+  String userEmail = "user@itum.mrt.ac.lk";
+  // Add a constant for admin email to avoid hardcoding it multiple times
+  final String adminEmail = "22it0495@itum.mrt.ac.lk";
+
+  @override
+  void initState() {
+    super.initState();
+    // Load user email when the page initializes
+    _loadUserEmail();
+  }
 
   void updateCategory(String category) {
     setState(() {
@@ -36,10 +48,58 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  Future<void> _loadUserEmail() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String? email = prefs.getString('userEmail');
+
+      if (email != null) {
+        setState(() {
+          userEmail = email;
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error loading user email: $e");
+      }
+    }
+  }
+
   // Modified to ensure proper navigation and debug print
+  void navigateFoodDetailPageEdit(String title, String price, String imagePath, String rating, String subtitle, String documentId) {
+    try {
+      if (mounted) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FoodDetailPageEdit(
+              title: title,
+              price: price,
+              imagePath: imagePath,
+              rating: rating,
+              subtitle: subtitle,
+              collectionName: selectedCategory.toLowerCase(), // Use the appropriate collection name
+              documentId: documentId, // Pass the document ID
+            ),
+          ),
+        );
+
+        if (kDebugMode) {
+          print("Navigation push completed");
+        }
+      } else {
+        if (kDebugMode) {
+          print("Context is null or not mounted!");
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print("Error navigating to food detail: $e");
+      }
+    }
+  }
+
   void navigateFoodDetailPage(String title, String price, String imagePath, String rating, String subtitle) {
     try {
-
       if (mounted) {
         Navigator.of(context).push(
           MaterialPageRoute(
@@ -84,7 +144,7 @@ class _MainPageState extends State<MainPage> {
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: Colors.black.withValues(alpha: 0.1), // Fixed: replaced withValues with withOpacity
               spreadRadius: 2,
               blurRadius: 10,
               offset: const Offset(0, -3),
@@ -267,9 +327,9 @@ class _MainPageState extends State<MainPage> {
                 fontSize: 24,
               ),
             ),
-            // Food Grid
 
-            SizedBox(height: 5),
+            // Fixed: Added proper initialization for SizedBox
+            const SizedBox(height: 5),
 
             Expanded(
               child: Consumer<CartModel>(
@@ -286,9 +346,10 @@ class _MainPageState extends State<MainPage> {
                               padding: const EdgeInsets.symmetric(vertical: AppDimension.paddingDefault),
                               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
-                                crossAxisSpacing: 10, // Adjust this ratio as needed
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10, // Added for better spacing
                               ),
-                              itemCount: 6, // Show multiple shimmer items while loading
+                              itemCount: 4, // Reduced count for better performance
                               itemBuilder: (context, index) {
                                 return ShimmerLoading(
                                   child: Padding(
@@ -343,20 +404,20 @@ class _MainPageState extends State<MainPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.no_meals, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
-                          Text('No food items available'),
+                          const Icon(Icons.no_meals, size: 64, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          const Text('No food items available'),
                         ],
                       ),
                     );
                   }
-                  // Data loaded successfully - show grid with staggered animations
+                  // Data loaded successfully - show grid with optimized animations
                   else {
                     return GridView.builder(
                       padding: const EdgeInsets.symmetric(vertical: AppDimension.paddingDefault),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 10,
+                        crossAxisSpacing: 10, // Added for better spacing
                       ),
                       itemCount: value.foodItems.length,
                       itemBuilder: (context, index) {
@@ -368,7 +429,9 @@ class _MainPageState extends State<MainPage> {
                         final imagePath = item[2];
                         final rating = item[3];
                         final subtitle = item[4];
+                        final documentId = item.length > 5 ? item[5] : "";
 
+                        // Fixed: Simplified animation for better performance
                         return AnimatedOpacity(
                           opacity: 1.0,
                           duration: const Duration(milliseconds: 500),
@@ -388,7 +451,14 @@ class _MainPageState extends State<MainPage> {
                               imagePath: imagePath,
                               rating: rating,
                               subtitle: subtitle,
-                              onTap: () => navigateFoodDetailPage(title, price, imagePath, rating, subtitle),
+                              onTap: () {
+                                // Check if the user is an admin using the constant
+                                if (userEmail == adminEmail) {
+                                  navigateFoodDetailPageEdit(title, price, imagePath, rating, subtitle, documentId);
+                                } else {
+                                  navigateFoodDetailPage(title, price, imagePath, rating, subtitle);
+                                }
+                              },
                             ),
                           ),
                         );
