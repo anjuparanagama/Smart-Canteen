@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="255.47568mm"
+   height="261.51865mm"
+   viewBox="0 0 255.47564 261.51859"
+   version="1.1"
+   id="svg1"
+   xml:space="preserve"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="float_drinks.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.68862935"
+     inkscape:cx="570.69888"
+     inkscape:cy="506.07776"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showgrid="false" /><defs
+     id="defs1"><path
+       id="a"
+       d="M -22,2.24 H 20 V 22 h -42 z" /></defs><g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(46.298887,-45.277977)"><g
+       style="fill:#000000"
+       id="g1"
+       transform="matrix(8.8194444,0,0,8.8194444,50.426789,148.04661)"><path
+         fill-rule="evenodd"
+         clip-rule="evenodd"
+         d="M 11.25,12.75 V 18 h 1.5 V 12.75 H 18 v -1.5 H 12.75 V 6 h -1.5 v 5.25 H 6 v 1.5 z"
+         fill="#080341"
+         id="path1-4"
+         style="fill:#000000" /></g><g
+       style="fill:#000000"
+       id="g9"
+       transform="matrix(0.41341146,0,0,0.41341146,-80.726553,45.277977)"><g
+         id="g2-0">
+	<g
+   id="g1-9">
+		<polygon
+   points="83.277,155.039 428.723,155.039 422.965,85.95 273.272,85.95 273.272,53.746 363.381,33.721 355.887,0 238.728,26.035 238.728,85.95 89.035,85.95 "
+   id="polygon1" />
+	</g>
+</g><g
+         id="g4-4">
+	<g
+   id="g3-8">
+		<path
+   d="m 106.307,189.584 1.647,46.085 c 15.21,0.267 23.693,4.161 30.539,7.321 5.437,2.51 9.029,4.168 17.709,4.168 8.68,0 12.273,-1.658 17.71,-4.167 7.092,-3.274 15.918,-7.348 32.185,-7.348 16.268,0 25.094,4.074 32.186,7.348 0.152,0.07 0.297,0.137 0.446,0.205 v -53.612 z"
+   id="path2-8" />
+	</g>
+</g><g
+         id="g6">
+	<g
+   id="g5-2">
+		<path
+   d="m 387.979,274.356 c -7.092,3.272 -15.919,7.346 -32.189,7.346 -16.268,0 -25.096,-4.074 -32.188,-7.346 -5.44,-2.51 -9.032,-4.168 -17.714,-4.168 -8.68,0 -12.273,1.658 -17.71,4.167 -4.049,1.869 -8.667,3.994 -14.906,5.479 V 454.426 H 238.727 V 279.837 c -6.247,-1.484 -10.87,-3.612 -14.922,-5.482 -5.437,-2.509 -9.03,-4.167 -17.71,-4.167 -8.68,0 -12.271,1.658 -17.709,4.167 -7.092,3.274 -15.918,7.348 -32.186,7.348 -16.267,0 -25.093,-4.074 -32.185,-7.348 -4.792,-2.212 -8.155,-3.761 -14.828,-4.097 L 117.822,512 h 276.357 l 8.634,-241.742 c -6.676,0.337 -10.041,1.885 -14.834,4.098 z"
+   id="path4" />
+	</g>
+</g><g
+         id="g8">
+	<g
+   id="g7">
+		<path
+   d="m 273.272,189.584 v 53.605 c 0.144,-0.067 0.283,-0.13 0.43,-0.198 7.092,-3.274 15.918,-7.348 32.186,-7.348 16.269,0 25.097,4.074 32.189,7.346 5.44,2.51 9.032,4.168 17.713,4.168 8.682,0 12.275,-1.658 17.714,-4.168 6.846,-3.16 15.331,-7.054 30.542,-7.321 l 1.647,-46.085 H 273.272 Z"
+   id="path6" />
+	</g>
+</g></g></g></svg>

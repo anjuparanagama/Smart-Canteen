@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:unibites/authentication/login_screen.dart';
@@ -90,9 +91,13 @@ class _VerifyEmailState extends State<VerifyEmailLogin> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('emailverified', true);
-      print('Email verification status saved to SharedPreferences');
+      if (kDebugMode) {
+        print('Email verification status saved to SharedPreferences');
+      }
     } catch (e) {
-      print('Error saving email verification status: $e');
+      if (kDebugMode) {
+        print('Error saving email verification status: $e');
+      }
     }
   }
 

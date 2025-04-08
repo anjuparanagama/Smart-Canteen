@@ -7,32 +7,35 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class FoodDetailPageEdit extends StatefulWidget {
+class addNewPopularItems extends StatefulWidget {
   final String title;
   final String price;
   final String imagePath;
   final String rating;
   final String subtitle;
-  // Add documentId to identify which document to update
-  final String collectionName;
+  // documentId will be empty for new items
   final String documentId;
+  // New parameters for collection name and document prefix
+  final String collectionName;
+  final String documentPrefix;
 
-  const FoodDetailPageEdit({
+  const addNewPopularItems({
     super.key,
-    required this.title,
-    required this.price,
-    required this.imagePath,
-    required this.rating,
-    required this.subtitle,
-    required this.collectionName,
-    required this.documentId,
+    this.title = '',
+    this.price = '',
+    this.imagePath = '',
+    this.rating = '4.5',
+    this.subtitle = '',
+    this.documentId = '',
+    this.collectionName = 'popular', // Default collection name
+    this.documentPrefix = 'pop', // Default document prefix
   });
 
   @override
-  State<FoodDetailPageEdit> createState() => _FoodDetailPageState();
+  State<addNewPopularItems> createState() => _addNewPopularItemsState();
 }
 
-class _FoodDetailPageState extends State<FoodDetailPageEdit> {
+class _addNewPopularItemsState extends State<addNewPopularItems> {
   // Text editing controllers
   late TextEditingController titleController;
   late TextEditingController priceController;
@@ -50,20 +53,31 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
   // Track if any changes were made
   bool _hasChanges = false;
   bool _isImageLoading = false;
+  bool _isNewItem = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with the provided values
+    // Check if this is a new item
+    _isNewItem = widget.documentId.isEmpty;
+
+    // Initialize controllers with the provided values or defaults for new items
     titleController = TextEditingController(text: widget.title);
     priceController = TextEditingController(text: widget.price);
-    ratingController = TextEditingController(text: widget.rating);
+    ratingController = TextEditingController(text: widget.rating.isEmpty ? '4.5' : widget.rating);
     subtitleController = TextEditingController(text: widget.subtitle);
     servingController = TextEditingController(text: '01 Serving');
     descriptionTitleController = TextEditingController(text: 'Description');
     descriptionController = TextEditingController(
-      text: 'Delicious curries prepared with authentic spices and fresh ingredients. Perfect for a satisfying meal.',
+      text: widget.subtitle.isEmpty
+          ? 'Delicious meal prepared with authentic spices and fresh ingredients. Perfect for a satisfying meal.'
+          : 'Delicious ${widget.title.toLowerCase()} prepared with authentic spices and fresh ingredients. Perfect for a satisfying meal.',
     );
+
+    // For new items, mark as having changes by default
+    if (_isNewItem) {
+      _hasChanges = true;
+    }
 
     // Add listeners to detect changes
     titleController.addListener(_onTextChanged);
@@ -112,10 +126,15 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
     });
 
     try {
+      // Use documentId if available, otherwise use a timestamp
+      String imageFileName = widget.documentId.isNotEmpty
+          ? widget.documentId
+          : '${widget.documentPrefix}_new';
+
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('food_images')
-          .child('${widget.documentId}_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          .child('${imageFileName}_${DateTime.now().millisecondsSinceEpoch}.jpg');
 
       await storageRef.putFile(_imageFile!);
       final downloadUrl = await storageRef.getDownloadURL();
@@ -160,6 +179,42 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
     super.dispose();
   }
 
+  // Function to get the next available document ID
+  Future<String> _getNextDocumentId() async {
+    try {
+      // Query all documents in the collection
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection(widget.collectionName)
+          .get();
+
+      int maxId = 0;
+      String prefix = widget.documentPrefix;
+
+      // Loop through existing documents to find the highest ID number
+      for (var doc in snapshot.docs) {
+        String docId = doc.id;
+        if (docId.startsWith(prefix)) {
+          try {
+            int idNumber = int.parse(docId.substring(prefix.length));
+            if (idNumber > maxId) {
+              maxId = idNumber;
+            }
+          } catch (e) {
+            // Skip if document ID doesn't have a number format we expect
+          }
+        }
+      }
+
+      // Create the next document ID
+      int nextId = maxId + 1;
+      String paddedId = nextId.toString().padLeft(3, '0');
+      return '$prefix$paddedId';
+    } catch (e) {
+      // If there's an error, default to a timestamp-based ID as fallback
+      return '${widget.documentPrefix}001';
+    }
+  }
+
   // Save changes to Firestore
   Future<void> _saveChangesToFirestore() async {
     try {
@@ -169,36 +224,60 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
         imageUrl = await _uploadImage();
       }
 
-      // Update Firestore document
       final updateData = {
         'item_name': titleController.text,
         'item_price': priceController.text,
         'item_rating': ratingController.text,
         'item_description': subtitleController.text,
         'description': descriptionController.text,
+        'timestamp': FieldValue.serverTimestamp(),
       };
 
       // Only add image URL to update if we have a new one
       if (imageUrl != null) {
         updateData['item_image'] = imageUrl;
+      } else if (widget.imagePath.isNotEmpty && _isNewItem) {
+        // For new items, use the existing image path if no new image is selected
+        updateData['item_image'] = widget.imagePath;
       }
 
-      await FirebaseFirestore.instance
-          .collection(widget.collectionName)
-          .doc(widget.documentId)
-          .update(updateData);
+      if (widget.documentId.isNotEmpty) {
+        // Update existing document
+        await FirebaseFirestore.instance
+            .collection(widget.collectionName)
+            .doc(widget.documentId)
+            .update(updateData);
+      } else {
+        // This is a new item, get the next available document ID
+        String newDocId = await _getNextDocumentId();
+
+        // Add the new document with the next ID
+        await FirebaseFirestore.instance
+            .collection(widget.collectionName)
+            .doc(newDocId)
+            .set(updateData);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Changes saved successfully!'),
-          backgroundColor: Colors.green,),
+        const SnackBar(
+          content: Text('Changes saved successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
       setState(() {
         _hasChanges = false;
       });
+
+      // Pop after a short delay to allow the user to see the success message
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pop(context);
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving changes: $e'),
-            backgroundColor: Colors.red),
+        SnackBar(
+            content: Text('Error saving changes: $e'),
+            backgroundColor: Colors.red
+        ),
       );
     }
   }
@@ -237,6 +316,19 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          title: Text(
+            widget.documentId.isEmpty ? 'Add New Item' : 'Edit Item',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          toolbarHeight: 0, // Hide the AppBar but keep the title for semantics
+        ),
         body: Stack(
           children: [
             _buildHeaderImage(),
@@ -244,7 +336,7 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
             _buildDetailContent(),
             if (_isImageLoading)
               Container(
-                color: Colors.black.withValues(alpha: 0.5),
+                color: Colors.black.withOpacity(0.5),
                 child: const Center(
                   child: CircularProgressIndicator(
                     color: Color(0xFFFFD634),
@@ -272,7 +364,8 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
           fit: BoxFit.cover,
         ),
       );
-    } else {
+    } else if (widget.imagePath.isNotEmpty) {
+      // Existing item with image path
       return ClipRRect(
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(0),
@@ -284,10 +377,34 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
           width: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.image_not_supported, size: 100),
+              _buildPlaceholderImage(),
         ),
       );
+    } else {
+      // New item without image yet
+      return _buildPlaceholderImage();
     }
+  }
+
+  Widget _buildPlaceholderImage() {
+    return Container(
+      height: 350,
+      width: double.infinity,
+      color: Colors.grey[300],
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.image, size: 80, color: Colors.grey),
+            SizedBox(height: 10),
+            Text(
+              "Tap the camera icon to add an image",
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // Navigation Buttons (Back and Image Picker)
@@ -333,11 +450,11 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_library,
-              color: Colors.black,),
+                color: Colors.black,),
               title: const Text('Gallery',
-              style: TextStyle(
-                color: Colors.black
-              ),),
+                style: TextStyle(
+                    color: Colors.black
+                ),),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImage(ImageSource.gallery);
@@ -345,11 +462,11 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_camera,
-              color: Colors.black,),
+                color: Colors.black,),
               title: const Text('Camera',
-              style: TextStyle(
-                color: Colors.black
-              ),),
+                style: TextStyle(
+                    color: Colors.black
+                ),),
               onTap: () {
                 Navigator.of(context).pop();
                 _pickImage(ImageSource.camera);
@@ -436,7 +553,7 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
                   },
                   child: const Text('Save',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),),
                 ),
@@ -450,7 +567,10 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
-        child: const Text('Save Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        child: Text(
+            widget.documentId.isEmpty ? 'Add Item' : 'Save Changes',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+        ),
       ),
     );
   }
@@ -486,7 +606,7 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.7),
+            color: Colors.black.withOpacity(0.7),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -589,7 +709,7 @@ class _FoodDetailPageState extends State<FoodDetailPageEdit> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: Colors.white.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),

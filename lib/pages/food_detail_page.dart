@@ -38,7 +38,7 @@ class FoodDetailPage extends StatelessWidget {
         bottomLeft: Radius.circular(0),
         bottomRight: Radius.circular(0),
       ),
-      child: Image.asset(
+      child: Image.network(
         imagePath,
         height: 350,
         width: double.infinity,

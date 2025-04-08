@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:unibites/models/add_new_item.dart';
 import 'package:unibites/models/cart_model.dart';
 import 'package:unibites/pages/food_detail_page_edit.dart';
 import 'package:unibites/resources/color.dart';
@@ -29,6 +30,18 @@ class _MainPageState extends State<MainPage> {
   // Add a constant for admin email to avoid hardcoding it multiple times
   final String adminEmail = "22it0495@itum.mrt.ac.lk";
 
+  // Map to store category-specific SVG paths
+  final Map<String, String> categoryIcons = {
+    'Popular': 'assets/icons/float_popular.svg',
+    'Breakfast': 'assets/icons/float_breakfast.svg',
+    'Lunch': 'assets/icons/float_lunch.svg',
+    'Drinks': 'assets/icons/float_drinks.svg',
+    'Dessert': 'assets/icons/float_dessert.svg',
+    'Snacks': 'assets/icons/float_snacks.svg',
+    'Biscuits': 'assets/icons/float_biscuit.svg',
+    'Dairy': 'assets/icons/float_diary.svg',
+  };
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +53,12 @@ class _MainPageState extends State<MainPage> {
     setState(() {
       selectedCategory = category;
     });
+
+    // Debug print to confirm category change
+    if (kDebugMode) {
+      print("Category changed to: $category");
+      print("Using icon: ${categoryIcons[category] ?? 'assets/icons/float_popular.svg'}");
+    }
   }
 
   void _onItemTapped(int index) {
@@ -139,6 +158,106 @@ class _MainPageState extends State<MainPage> {
           icon: const Icon(Icons.menu_sharp, color: Colors.black),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          switch (selectedCategory) {
+            case "Popular":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'popular',
+                    documentPrefix: 'pop',
+                  ),
+                ),
+              );
+              break;
+            case "Breakfast":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'breakfast',
+                    documentPrefix: 'bf',
+                  ),
+                ),
+              );
+              break;
+            case "Lunch":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'lunch',
+                    documentPrefix: 'lu',
+                  ),
+                ),
+              );
+              break;
+            case "Drinks":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'drinks',
+                    documentPrefix: 'dr',
+                  ),
+                ),
+              );
+              break;
+            case "Dessert":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'dessert',
+                    documentPrefix: 'des',
+                  ),
+                ),
+              );
+              break;
+            case "Snacks":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'snacks',
+                    documentPrefix: 'sn',
+                  ),
+                ),
+              );
+              break;
+            case "Biscuits":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'biscuits',
+                    documentPrefix: 'bi',
+                  ),
+                ),
+              );
+              break;
+            case "Dairy":
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => addNewPopularItems(
+                    collectionName: 'diary',
+                    documentPrefix: 'di',
+                  ),
+                ),
+              );
+              break;
+          }
+        },
+        backgroundColor: const Color(0xFFFFD634),
+        child: SvgPicture.asset(
+          // Use the selected category icon or fallback to default
+          categoryIcons[selectedCategory] ?? 'assets/icons/float_popular.svg',
+          height: 24,
+          width: 24,
+          // Add error handling for SVG loading
+          placeholderBuilder: (BuildContext context) => const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -328,7 +447,6 @@ class _MainPageState extends State<MainPage> {
               ),
             ),
 
-            // Fixed: Added proper initialization for SizedBox
             const SizedBox(height: 5),
 
             Expanded(
@@ -467,7 +585,7 @@ class _MainPageState extends State<MainPage> {
                   }
                 },
               ),
-            )
+            ),
           ],
         ),
       ),

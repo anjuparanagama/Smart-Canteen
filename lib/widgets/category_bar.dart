@@ -35,7 +35,10 @@ class _InteractiveHorizontalCategoriesMenuState
       CategoryItem(
           icon: AppImages.popularIcon,
           label: 'Popular',
-          action: () => print('Popular category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchPopularItems();
+          }),
       CategoryItem(
           icon: AppImages.breakfastIcon,
           label: 'Breakfast',
@@ -46,27 +49,45 @@ class _InteractiveHorizontalCategoriesMenuState
       CategoryItem(
           icon: AppImages.lunchIcon,
           label: 'Lunch',
-          action: () => print('Lunch category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchLunchItems();
+          }),
       CategoryItem(
           icon: AppImages.drinksIcon,
           label: 'Drinks',
-          action: () => print('Drinks category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchDrinkItems();
+          }),
       CategoryItem(
           icon: AppImages.dessertIcon,
           label: 'Dessert',
-          action: () => print('Dessert category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchDessertItems();
+          }),
       CategoryItem(
           icon: AppImages.snacksIcon,
           label: 'Snacks',
-          action: () => print('Snacks category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchSnacksItems();
+          }),
       CategoryItem(
           icon: AppImages.cookiesIcon,
           label: 'Biscuits',
-          action: () => print('Biscuits category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchBiscuitItems();
+          }),
       CategoryItem(
           icon: AppImages.dairyIcon,
           label: 'Dairy',
-          action: () => print('Dairy category selected')),
+          action: () {
+            // Move the Provider call inside a method that has access to context
+            Provider.of<CartModel>(context, listen: false).fetchDairyItems();
+          }),
     ];
   }
 
